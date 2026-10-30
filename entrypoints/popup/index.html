@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Contrib Dance</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="bar">
+      <span class="logo">Contrib <b>Dance</b></span>
+      <span class="tempo-badge"><span id="bpmBadge">120 BPM</span><span class="beat" id="beat" aria-hidden="true"></span></span>
+    </header>
+
+    <section class="ctl" id="ctlHl">
+      <div class="head">
+        <label class="sw-lbl"><input type="checkbox" class="sw" id="hlOn" /><span class="knob" aria-hidden="true"></span> Highlight</label>
+        <span class="val" id="hlVal"></span>
+      </div>
+      <div class="body">
+        <div class="slider">
+          <input type="range" id="hl" min="0" max="1000" step="1" aria-label="Brightness max" aria-describedby="hlSub" />
+          <span class="mark" id="hlMark" hidden title="GitHub's own look"></span>
+        </div>
+        <div class="row">
+          <span class="sub" id="hlSub"></span>
+          <button type="button" class="link" id="hlReset">GitHub's look</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="hlGlow" /> Glow on days above the max</label>
+      </div>
+    </section>
+
+    <section class="ctl" id="ctlDn">
+      <div class="head">
+        <label class="sw-lbl"><input type="checkbox" class="sw" id="dnOn" /><span class="knob" aria-hidden="true"></span> Dance</label>
+        <span class="val" id="dnVal"></span>
+      </div>
+      <div class="body">
+        <input type="range" id="dn" min="0" max="1000" step="1" aria-label="Number of dancers" aria-describedby="dnSub" />
+        <span class="sub" id="dnSub">The most active days dance first. The brighter the tile, the wilder the dance.</span>
+        <select id="choreo" aria-label="Choreography">
+          <option value="free">Freestyle</option>
+          <option value="wave">Stadium wave</option>
+          <option value="chorus">Chorus line (row by row)</option>
+          <option value="call">Call and response</option>
+          <option value="auto">Auto: new routine every 8 bars</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="ctl" id="ctlDs">
+      <div class="head">
+        <label class="sw-lbl"><input type="checkbox" class="sw" id="dsOn" /><span class="knob" aria-hidden="true"></span> Disco lights</label>
+        <span class="val" id="dsVal"></span>
+      </div>
+      <div class="body">
+        <div class="layers" role="group" aria-label="Light layers">
+          <label class="chk"><input type="checkbox" id="rainbow" /> Rainbow</label>
+          <label class="chk"><input type="checkbox" id="ball" /> Mirror ball</label>
+          <label class="chk"><input type="checkbox" id="beams" /> Spotlights</label>
+        </div>
+        <label class="sub" for="sat">Color saturation</label>
+        <input type="range" id="sat" min="0" max="1000" step="1" />
+        <label class="chk"><input type="checkbox" id="club" /> Club mode (dark backdrop)</label>
+      </div>
+    </section>
+
+    <section class="ctl">
+      <div class="head">
+        <label class="lbl" for="bpm">Tempo for dance and lights</label>
+        <span class="val" id="bpmVal"></span>
+      </div>
+      <div class="row nowrap">
+        <input type="range" id="bpm" min="60" max="150" step="1" />
+        <button type="button" class="btn" id="tap">Tap</button>
+      </div>
+      <p class="note" id="rmNote" hidden>Your system asks for reduced motion. On this device, dance and disco start only after you turn them on here.</p>
+    </section>
+
+    <footer class="status"><span id="status">Checking this tab…</span><br /><button type="button" class="btn" id="grant" hidden>Allow access to github.com</button></footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

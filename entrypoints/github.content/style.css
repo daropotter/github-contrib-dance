@@ -1,0 +1,156 @@
+/* Contrib Dance: everything is scoped under .cd-on, which the content script adds to .js-calendar-graph
+   and removes again (with every inline change) once all features are off. */
+
+/* Registered so fades can transition them; inherited so the td::after square sees the td's values. */
+@property --cd-dk { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --cd-j { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --cd-amp { syntax: "<number>"; inherits: true; initial-value: 1; }
+
+@media not (forced-colors: active) {
+  /* GitHub's overrides live only here, so removing .cd-on (or this stylesheet) restores the page.
+     Dancers and the mirror ball must not be clipped by the root's overflow-hidden or the table's overflow. */
+  .js-calendar-graph.cd-on {
+    position: relative !important;
+    isolation: isolate;
+    overflow: visible !important;
+    transition: --cd-dk 0.6s ease, background-color 0.6s ease, box-shadow 0.6s ease;
+    border-radius: 6px;
+  }
+  .cd-on table.ContributionCalendar-grid { overflow: visible !important; }
+  .cd-on .cd-scroll-visible { overflow: visible !important; }
+  .cd-on .cd-scroll-pad { padding-block: 12px !important; margin-block: -12px !important; }
+  .cd-on [id^="contribution-graph-legend-level-"] { background-color: var(--cd-fill) !important; }
+
+  /* The td stays put (tooltip, hover and click target); the visible square is ::after, which can dance. */
+  .cd-on td.ContributionCalendar-day[data-date] {
+    position: relative;
+    z-index: 0;
+    background-color: transparent !important;
+    border-color: transparent !important;
+    transition: --cd-j 0.4s ease, --cd-amp 0.4s ease;
+  }
+  .cd-on td.ContributionCalendar-day[data-date]::after {
+    content: "";
+    position: absolute;
+    inset: -0.5px;
+    border-radius: 2px;
+    pointer-events: none;
+    background-color: var(--cd-fill, var(--contribution-default-bgColor-0));
+    box-shadow:
+      inset 0 0 0 0.5px var(--contribution-default-borderColor-0, transparent),
+      0 0 calc(7px * var(--cd-g, 0)) calc(1.5px * var(--cd-g, 0)) var(--cd-hot, #39d353);
+    transform-origin: 50% 100%;
+  }
+
+  /* ---------- dance: transform only; --cd-f fades a dancer (join × global), --cd-a adds brightness ---------- */
+  /* Raise the entire cell above the static tiles, including empty days in later rows/columns. */
+  .cd-on td.ContributionCalendar-day.cd-dance { z-index: 1; }
+  .cd-on td.cd-dance::after {
+    --cd-f: calc(var(--cd-j) * var(--cd-dk));
+    --cd-a: calc(var(--cd-amp) * var(--cd-f));
+    animation-duration: var(--cd-dur, 500ms);
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+  }
+  .cd-on td.cd-m-pulse::after { animation-name: cd-pulse; transform-origin: 50% 50%; }
+  .cd-on td.cd-m-sway::after { animation-name: cd-sway; }
+  .cd-on td.cd-m-shimmy::after { animation-name: cd-shimmy; }
+  .cd-on td.cd-m-bounce::after { animation-name: cd-bounce; }
+  .cd-on td.cd-m-robot::after { animation-name: cd-robot; animation-timing-function: steps(1, end); transform-origin: 50% 50%; }
+  .cd-on td.cd-m-conga::after { animation-name: cd-conga; animation-timing-function: steps(1, end); }
+  .cd-on td.cd-m-wave::after { animation-name: cd-wave; }
+  .cd-on td.cd-m-jump::after { animation-name: cd-jump; }
+  .cd-on td.cd-m-spin::after { animation-name: cd-spin; animation-timing-function: linear; transform-origin: 50% 50%; }
+  .cd-on td.cd-m-flip::after { animation-name: cd-flip; transform-origin: 50% 50%; }
+
+  /* ---------- disco ---------- */
+  .cd-on.cd-club {
+    background-color: #0b0912;
+    box-shadow: 0 0 0 8px #0b0912;
+    color-scheme: dark; /* dark scrollbar under the calendar */
+  }
+  .cd-on .ContributionCalendar-label,
+  .cd-on .color-fg-muted,
+  .cd-on .Link--muted { transition: color 0.6s ease; }
+  .cd-on.cd-club .ContributionCalendar-label,
+  .cd-on.cd-club .color-fg-muted,
+  .cd-on.cd-club .Link--muted { color: #a49db2 !important; }
+  .cd-on [id^="contribution-graph-legend-level-"] { transition: opacity 0.6s ease; }
+  .cd-on.cd-disco [id^="contribution-graph-legend-level-"] { opacity: 0.5; }
+
+  .cd-on .cd-beams {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    border-radius: 6px;
+  }
+
+  /* Mirror ball: highlight, sphere shading, facet rows and columns. Each facet layer is one 5px tile,
+     so scrolling it never shows a seam. */
+  .cd-on .cd-ball {
+    position: absolute;
+    left: 50%;
+    top: -24px;
+    width: 26px;
+    height: 26px;
+    margin-left: -13px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.95) 0 9%, transparent 34%),
+      radial-gradient(circle at 50% 50%, transparent 52%, rgba(20, 16, 30, 0.55) 100%),
+      linear-gradient(0deg, rgba(0, 0, 0, 0.32) 0 1px, transparent 1px),
+      linear-gradient(90deg, #8a879c 0 1px, #e9e8f2 1px);
+    background-size: 100% 100%, 100% 100%, 5px 5px, 5px 5px;
+    box-shadow: 0 0 14px 2px rgba(255, 255, 255, 0.35);
+    animation: cd-ballspin var(--cd-bar, 2s) linear infinite;
+  }
+  .cd-on .cd-ball::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 1px;
+    height: 12px;
+    background: #8d8aa0;
+  }
+  .cd-on .cd-ball.cd-ball-on { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-on .cd-ball { animation: none; }
+}
+
+@keyframes cd-ballspin { to { background-position: 0 0, 0 0, 10px 0, 10px 0; } }
+@keyframes cd-pulse { 0%, 100% { transform: scale(1); } 15% { transform: scale(calc(1 + 0.45 * var(--cd-a))); } 45% { transform: scale(1); } }
+@keyframes cd-sway { 0%, 100% { transform: rotate(calc(-16deg * var(--cd-a))); } 50% { transform: rotate(calc(16deg * var(--cd-a))); } }
+@keyframes cd-shimmy { 0%, 50%, 100% { transform: translateX(0); } 25% { transform: translateX(calc(-2.5px * var(--cd-a))); } 75% { transform: translateX(calc(2.5px * var(--cd-a))); } }
+@keyframes cd-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(calc(-6px * var(--cd-a))); } }
+@keyframes cd-robot {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(calc(45deg * var(--cd-f))) translateX(calc(1px * var(--cd-f))); }
+  50% { transform: rotate(0) translateY(calc(-2px * var(--cd-f))); }
+  75% { transform: rotate(calc(-45deg * var(--cd-f))) translateX(calc(-1px * var(--cd-f))); }
+}
+@keyframes cd-conga {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(calc(3px * var(--cd-a))); }
+  50% { transform: translateX(calc(3px * var(--cd-a))) translateY(calc(-2px * var(--cd-f))); }
+  75% { transform: translateX(0); }
+}
+@keyframes cd-wave { 0%, 60%, 100% { transform: translateY(0); } 12% { transform: translateY(calc(-8px * var(--cd-a))); } }
+@keyframes cd-jump {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  20% { transform: translateY(0) scale(calc(1 + 0.25 * var(--cd-f)), calc(1 - 0.3 * var(--cd-f))); }
+  50% { transform: translateY(calc(-9px * var(--cd-a))) scale(calc(1 - 0.15 * var(--cd-f)), calc(1 + 0.2 * var(--cd-f))); }
+  80% { transform: translateY(0) scale(calc(1 + 0.1 * var(--cd-f)), calc(1 - 0.1 * var(--cd-f))); }
+}
+@keyframes cd-spin { to { transform: rotate(calc(360deg * var(--cd-f))); } }
+@keyframes cd-flip { 0%, 100% { transform: perspective(40px) rotateY(0); } 50% { transform: perspective(40px) rotateY(calc(180deg * var(--cd-f))); } }
