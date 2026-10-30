@@ -2,18 +2,26 @@
 
 A Chrome and Firefox extension that restyles the contribution calendar on github.com profiles:
 
+https://github.com/user-attachments/assets/0a4cb352-2fe5-4811-adfc-0c1ad76ebfc0
+
 - **Highlight**: set your own brightness max (slider 0–1000, log scale, right = brighter) with a smooth gradient and an optional glow.
 - **Dance**: contribution tiles dance to a shared beat. The slider sets the percentage of active days that dance (most active first), and each tile's brightness sets how wild its moves are. Days with no contributions never dance and stay behind the dancers.
 - **Disco lights**: rainbow, mirror ball and spotlights in any combination, plus a saturation slider and a club mode.
 
-All settings live in the toolbar popup. They apply to every profile and sync across your devices (`storage.sync`). The only permission is `storage`.
+All settings live in the toolbar popup. They apply to every profile and may sync across your devices through your browser's built-in sync service (`storage.sync`). The extension requests the `storage` API permission and access to `https://github.com/*` to read and restyle contribution calendars. See the [privacy policy](PRIVACY.md) for details about local processing and preference synchronization.
+
+## Install
+
+**Firefox:** [Get Contrib Dance for GitHub on Mozilla Add-ons](https://addons.mozilla.org/pl/firefox/addon/contrib-dance-for-github/).
+
+Submitted to Mozilla and awaiting review; the listing or download may not be publicly available yet.
 
 ## Getting started
 
-Requires Node 22+.
+Builds are tested with Node 24.18.0 and npm 11.16.0.
 
 ```bash
-npm install
+npm ci
 npm run dev            # Chrome with hot reload
 npm run dev:firefox    # Firefox
 ```
@@ -31,6 +39,20 @@ npm run compile        # type check
 Installing a build by hand:
 - **Chrome:** `chrome://extensions` → Developer mode → "Load unpacked" → `.output/chrome-mv3`.
 - **Firefox:** `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on" → `.output/firefox-mv3/manifest.json`.
+
+## Reproducible AMO build
+
+The release build is tested on Linux x86_64 (Zorin OS 18.1, based on Ubuntu 24.04), with Node 24.18.0 and npm 11.16.0. Install [Node 24.18.0](https://nodejs.org/en/download/archive/v24.18.0); if needed, select the tested npm version with `npm install --global npm@11.16.0`. No global WXT installation is required.
+
+From the project root or the root of the extracted source archive, run:
+
+```bash
+npm ci
+npm run compile
+npm run zip:firefox
+```
+
+`npm ci` installs the exact public npm dependencies recorded in `package-lock.json` and automatically runs `wxt prepare`. The extension is built into `.output/firefox-mv3/`. Submit `.output/contrib-dance-0.1.0-firefox.zip` as the add-on and `.output/contrib-dance-0.1.0-sources.zip` as the matching source archive. The source archive excludes local recordings, build output and `node_modules`.
 
 ## Layout
 
@@ -52,7 +74,6 @@ Installing a build by hand:
 - Safety: no strobe, a tile's lightness changes by at most 3 L units per second, colors keep the red share below 0.7, and the tempo is capped at 150 BPM. On devices that ask for reduced motion, dance and disco start only after you turn them on in the popup on that device.
 - When everything is off, the extension removes its classes, styles and elements, and the page is exactly as GitHub rendered it.
 
-## Before publishing
+## License
 
-- Replace the Firefox add-on ID (`contrib-dance@contrib-dance` in `wxt.config.ts`) with the final one.
-- Store title: for example "Contrib Dance for GitHub", with a note that the extension is not affiliated with GitHub.
+Contrib Dance is released under the [MIT License](LICENSE). Bundled third-party components retain their own licenses; see [third-party notices](public/THIRD_PARTY_NOTICES.txt). The license, notices and privacy policy are also included in the packaged extension.
