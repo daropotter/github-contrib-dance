@@ -2,6 +2,10 @@
 
 A Chrome and Firefox extension that restyles the contribution calendar on github.com profiles:
 
+[![Watch Contrib Dance in action](preview.png)](preview.mp4)
+
+[▶ Watch the demo (MP4, 1.95 MB)](preview.mp4)
+
 - **Highlight**: set your own brightness max (slider 0–1000, log scale, right = brighter) with a smooth gradient and an optional glow.
 - **Dance**: contribution tiles dance to a shared beat. The slider sets the percentage of active days that dance (most active first), and each tile's brightness sets how wild its moves are. Days with no contributions never dance and stay behind the dancers.
 - **Disco lights**: rainbow, mirror ball and spotlights in any combination, plus a saturation slider and a club mode.
