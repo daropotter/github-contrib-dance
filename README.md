@@ -10,6 +10,12 @@ https://github.com/user-attachments/assets/0a4cb352-2fe5-4811-adfc-0c1ad76ebfc0
 
 All settings live in the toolbar popup. They apply to every profile and may sync across your devices through your browser's built-in sync service (`storage.sync`). The extension requests the `storage` API permission and access to `https://github.com/*` to read and restyle contribution calendars. See the [privacy policy](PRIVACY.md) for details about local processing and preference synchronization.
 
+## Install
+
+**Firefox:** [Get Contrib Dance for GitHub on Mozilla Add-ons](https://addons.mozilla.org/pl/firefox/addon/contrib-dance-for-github/).
+
+Submitted to Mozilla and awaiting review; the listing or download may not be publicly available yet.
+
 ## Getting started
 
 Builds are tested with Node 24.18.0 and npm 11.16.0.
