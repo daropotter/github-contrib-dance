@@ -1,0 +1,23 @@
+Your contribution graph has spent years standing in neat little rows. Give those squares a night out.
+
+Contrib Dance for GitHub adds adjustable brightness, animated choreography and disco lights to contribution calendars on GitHub profile pages. Keep things subtle with a gentle glow, or turn your calendar into a tiny nightclub. Your browser, your questionable artistic decisions.
+
+Make the calendar your own
+
+- Adjust the highlights. Change the brightness scale and add an optional glow to make active days stand out.
+- Choose the choreography. Try freestyle, stadium waves, chorus lines or call and response. Auto mode changes the routine for you.
+- Pick the dancers. Control how many active tiles join in. The most active days get first dibs on the dance floor.
+- Bring the lights. Mix rainbow colors, a mirror ball and spotlights, adjust saturation, or enable club mode.
+- Set the rhythm. Adjust the tempo or tap out a beat. No actual music included — your coworkers can thank us later.
+
+Everything is controlled from the toolbar popup and applies to the GitHub profiles you visit. Changes are visible only in your browser: the extension does not create commits, change contribution counts or edit anyone's GitHub profile.
+
+Privacy and control
+
+Calendar information is processed locally. The extension has no analytics, tracking or developer-operated backend. Only appearance and behavior preferences may synchronize through Chrome's built-in sync service, depending on your browser and Google account settings.
+
+Reduced-motion preferences are respected: dance and disco remain off until you explicitly enable animation on that device. Switch every feature off to restore GitHub's original calendar appearance.
+
+Permissions are limited to saving preferences and accessing github.com to read and restyle contribution calendars.
+
+Open source under the MIT license. An independent project, not affiliated with or endorsed by GitHub.

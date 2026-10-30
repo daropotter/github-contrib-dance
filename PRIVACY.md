@@ -35,7 +35,9 @@ lists, usernames, email addresses, identifiers, browsing history or page content
 Your browser may synchronize these preferences across your devices through its
 built-in synchronization service, depending on your browser and account
 configuration. In Firefox, this uses Firefox Sync according to your Mozilla
-account and browser settings. Synchronization is handled by the browser
+account and browser settings. In Chrome, preferences may be synchronized by
+Chrome's built-in sync service according to your Google account and browser
+settings. Synchronization is handled by the browser
 provider, not by a service operated by the extension's developer. The developer
 does not receive these synchronized preferences.
 
@@ -51,6 +53,14 @@ Preferences remain in browser-managed extension storage until they are reset or
 removed by the browser. You can control synchronization in your browser's Sync
 settings. Any retention of synchronized copies is governed by the browser
 provider's policies; the developer does not keep a separate copy.
+
+### Limited use
+
+Calendar information and preferences are used only to provide the extension's
+visible calendar customization features. They are not sold, used for
+advertising or creditworthiness decisions, or used for unrelated purposes.
+The extension's use of user data adheres to the Chrome Web Store User Data
+Policy, including its Limited Use requirements.
 
 ### Questions
 
