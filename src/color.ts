@@ -20,6 +20,22 @@ export function oklabToRgb(L: number, A: number, B: number): [number, number, nu
   ];
 }
 
+export type Lab = [number, number, number];
+
+/** sRGB (0..255) → OKLab. */
+export function rgbToOklab(r: number, g: number, b: number): Lab {
+  const lin = (c: number) => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+  const [R, G, B] = [lin(r), lin(g), lin(b)];
+  const l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B);
+  const m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B);
+  const s = Math.cbrt(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+}
+
 /** OKLab → rgb() with chroma pulled back until R/(R+G+B) < 0.7 (WCAG "saturated red" starts at 0.8). */
 export function safeRgb(L: number, A: number, B: number): string {
   let rgb = oklabToRgb(L, A, B);

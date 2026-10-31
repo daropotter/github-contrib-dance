@@ -1,6 +1,6 @@
 import { type Calendar, type Tile, levelVar } from './calendar';
 import { BeatClock } from './clock';
-import { clamp, ease, lerp, mixCss, mod, polar, safeRgb } from './color';
+import { type Lab, clamp, ease, lerp, mixCss, mod, polar, rgbToOklab, safeRgb } from './color';
 import type { CalendarInfo } from './messages';
 import { refMax } from './scale';
 import type { Choreo, Settings } from './settings';
@@ -32,6 +32,9 @@ const SPOTS = Array.from({ length: 8 }, (_, k) => {
 const BEAM_HUES = [195, 320, 50];
 const BEAM_EDGES = [0.05, 0.09, 0.13];         // stacked wedges = feathered edges instead of a hard sweep line
 const GREEN = polar(1, 150);
+/** GitHub's default light palette (OKLab), used only if the theme's colors cannot be read. */
+const FALLBACK_PALETTE: Lab[] = (['#eff2f5', '#aceebb', '#4ac26b', '#2da44e', '#116329'] as const).map(hex =>
+  rgbToOklab(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)));
 
 type Fade = 'hl' | 'disco' | 'rain' | 'ball' | 'beams' | 'glow' | 'dark';
 const FADES: Fade[] = ['hl', 'disco', 'rain', 'ball', 'beams', 'glow', 'dark'];
@@ -84,6 +87,10 @@ export class CalendarController {
   private ctx: CanvasRenderingContext2D | null = null;
   private ball: HTMLElement | null = null;
   private dark = false;
+  /** The theme's own level colors 0..4 in OKLab (holiday palettes included): the base the disco lights start from. */
+  private palette: Lab[] = FALLBACK_PALETTE;
+  /** Unit (a, b) direction of the palette's most colorful level, for tiles whose own level is near-neutral. */
+  private paletteHue: [number, number] = GREEN;
   private visible = true;
   private raf = 0;
   private lastT = 0;
@@ -110,6 +117,7 @@ export class CalendarController {
     }));
 
     this.dark = this.detectDark();
+    this.readPalette();
     this.retarget();
     for (const f of FADES) this.k[f] = this.target[f];  // first paint has no fade-in from GitHub's look...
     this.k.hl = 0;                                      // ...except the highlight, which eases in from the original
@@ -194,12 +202,42 @@ export class CalendarController {
     return 0.2126 * r + 0.7152 * g + 0.0722 * b < 110;
   }
 
+  /** Reads the level colors GitHub is showing right now (theme, colorblind mode, holiday) for the disco base and glow. */
+  private readPalette() {
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;width:0;height:0;pointer-events:none';
+    this.cal.root.appendChild(probe);
+    const read: Lab[] = [];
+    for (let level = 0; level <= 4; level++) {
+      probe.style.backgroundColor = '';
+      probe.style.backgroundColor = levelVar(this.cal.holiday, level);
+      const m = /rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)/.exec(getComputedStyle(probe).backgroundColor);
+      if (!m) break;
+      read.push(rgbToOklab(Number(m[1]), Number(m[2]), Number(m[3])));
+    }
+    probe.remove();
+    this.palette = read.length === 5 ? read : FALLBACK_PALETTE;
+    let best = 0;
+    for (const [, a, b] of this.palette.slice(1)) {
+      const c = Math.hypot(a, b);
+      if (c > best) { best = c; this.paletteHue = [a / c, b / c]; }
+    }
+    if (best < 0.02) this.paletteHue = GREEN;
+  }
+
+  /** Palette color at position x (0..4), interpolated in OKLab like the highlight gradient. */
+  private paletteAt(x: number): Lab {
+    const i = Math.min(3, Math.max(0, Math.floor(x))), f = clamp(x - i, 0, 1);
+    const p = this.palette[i]!, q = this.palette[i + 1]!;
+    return [lerp(p[0], q[0], f), lerp(p[1], q[1], f), lerp(p[2], q[2], f)];
+  }
+
   private onTheme = () => {
-    const dark = this.detectDark();
-    if (dark === this.dark) return;
-    this.dark = dark;
+    this.dark = this.detectDark();
+    this.readPalette();                              // also catches palette-only switches (colorblind themes)
+    this.hot = '';
     this.retarget();
-    if (this.mounted) this.kick();
+    if (this.mounted) { this.syncDiscoDom(); this.kick(); }
   };
 
   // ---------- mounting ----------
@@ -293,7 +331,8 @@ export class CalendarController {
     if (Math.abs(dr) > 1e-3) { this.lr += dr * Math.min(1, dt / R_TAU_S); moving = true; }
     else this.lr += dr;
     if (moving) this.refreshDanceSoon();      // amplitudes and moves follow the brightness while it changes
-    this.render(BeatClock.now(), dt);
+    // Tiles still slewing toward a new lightness (e.g. after a theme change) keep the loop running.
+    if (this.render(BeatClock.now(), dt)) moving = true;
     this.cleanupFaded();
     const animated = this.k.disco > 0 && this.k.rain + this.k.ball + this.k.beams > 0;
     if ((moving || animated) && this.visible) this.raf = requestAnimationFrame(this.frame);
@@ -301,13 +340,16 @@ export class CalendarController {
     else this.lastT = 0;                      // off-screen: resume from a fresh dt when visible again
   };
 
-  private render(now: number, dt: number) {
-    if (!this.mounted) return;
+  /** Draws one frame; returns true while any disco tile is still slewing toward its target lightness. */
+  private render(now: number, dt: number): boolean {
+    if (!this.mounted) return false;
+    let slewing = false;
     const k = this.k, kh = ease(k.hl), kd = ease(k.disco), kg = ease(k.glow);
     const R = this.R(), hol = this.cal.holiday;
     const b = this.clock.beat(now), slew = SLEW * dt;
 
-    const hot = mixCss('#c8ffcf', '#1fd655', ease(k.dark));
+    const [ha, hb] = this.paletteHue;          // glow in the palette's own color: lighter on dark, richer on light
+    const hot = mixCss(safeRgb(0.92, ha * 0.09, hb * 0.09), safeRgb(0.74, ha * 0.2, hb * 0.2), ease(k.dark));
     if (hot !== this.hot) this.cal.root.style.setProperty('--cd-hot', (this.hot = hot));
 
     for (const t of this.tiles) {
@@ -316,7 +358,9 @@ export class CalendarController {
       else col = mixCss(this.smooth(t.count / R), levelVar(hol, t.level), kh);
       if (kd > 0.001) {
         const sh = this.shade(t, b, this.intensity(t));
-        t.L = t.L === null || !dt ? sh.L : t.L + clamp(sh.L - t.L, -slew, slew);
+        // Only a tile with no lightness yet starts at its target; otherwise even a first frame (dt = 0) is slew-limited.
+        t.L = t.L === null ? sh.L : t.L + clamp(sh.L - t.L, -slew, slew);
+        if (Math.abs(sh.L - t.L) > 1e-3) slewing = true;
         col = mixCss(safeRgb(t.L, sh.A, sh.B), col, kd);
       } else t.L = null;
       if (col !== t.col) t.el.style.setProperty('--cd-fill', (t.col = col));
@@ -330,6 +374,7 @@ export class CalendarController {
       if (col !== this.legendCol[i]) el.style.setProperty('--cd-fill', (this.legendCol[i] = col));
     });
     if (this.ctx) this.drawBeams(b);
+    return slewing;
   }
 
   /** Continuous color for brightness t, interpolated in OKLab between the theme's own level colors. */
@@ -531,16 +576,26 @@ export class CalendarController {
   }
 
   /**
-   * Per-tile light in OKLab. Lightness comes from brightness (so the highlight still matters); layers move the
-   * (a, b) color vector. Vectors blend continuously, so fades and crossing spots never flip a hue.
+   * Per-tile light in OKLab. The base is the theme's own palette at the tile's brightness (the same color the
+   * highlight shows), so Halloween, winter, colorblind and dark palettes stay themselves until a layer recolors
+   * them. Layers move the (a, b) color vector; vectors blend continuously, so fades and crossing spots never flip a hue.
    */
   private shade(t: Tile, b: number, v: number) {
     const k = this.k, kd = ease(k.dark), kr = ease(k.rain), kb = ease(k.ball), sgn = lerp(-1, 1, kd), active = t.count > 0;
-    let L = active ? lerp(0.95 - 0.45 * v, 0.27 + 0.56 * v, kd) : lerp(0.95, 0.22, kd);
+    let [L, A, B] = this.paletteAt(active ? clamp(4 * v + 0.5, 0.4, 4) : 0);
     const C0 = active ? 0.035 + 0.13 * v : 0.02;
-    let A = C0 * GREEN[0], B = C0 * GREEN[1];
+    // Club backdrop over a light theme: the palette is drawn for a white page (more = darker), so lightness is
+    // re-mapped to "more = brighter" while the hue stays the palette's. Near-neutral levels (Halloween's black
+    // top level) get only the missing chroma added along the palette's main hue, which is zero at C == C0, so a
+    // tile whose brightness crosses that point never snaps hue.
+    const club = this.dark ? 0 : kd;
+    if (club > 0) {
+      L = lerp(L, active ? 0.27 + 0.56 * v : 0.22, club);
+      const miss = active ? Math.max(0, C0 - Math.hypot(A, B)) * club : 0;
+      A += this.paletteHue[0] * miss; B += this.paletteHue[1] * miss;
+    }
     if (kr > 0) {                                     // rainbow: hue flows diagonally across the year
-      const [ra, rb] = polar(C0 + 0.04, 150 + t.w * 7 + t.d * 13 + mod(b * 30, 360));
+      const [ra, rb] = polar(Math.max(C0, Math.hypot(A, B)) + 0.04, 150 + t.w * 7 + t.d * 13 + mod(b * 30, 360));
       A = lerp(A, ra, kr); B = lerp(B, rb, kr);
     }
     if (kb > 0) {                                     // mirror-ball spots drifting left to right
