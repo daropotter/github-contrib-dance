@@ -1,6 +1,6 @@
 ## Files and publisher setup
 
-- Run `npm run zip` and upload `.output/contrib-dance-0.1.0-chrome.zip`, not the Firefox or source ZIP. The build output is local and is not committed to the repository.
+- Run `npm run zip` and upload `.output/contrib-dance-0.2.0-chrome.zip`, not the Firefox or source ZIP. The build output is local and is not committed to the repository.
 - Store icon: [128 × 128 PNG](../public/icon/128.png).
 - Detailed description: [chrome-description.txt](chrome-description.txt), ready to copy as plain text.
 - Test instructions: [chrome-test-instructions.md](chrome-test-instructions.md).

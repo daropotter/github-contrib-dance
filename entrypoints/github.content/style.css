@@ -13,7 +13,7 @@
     position: relative !important;
     isolation: isolate;
     overflow: visible !important;
-    transition: --cd-dk 0.6s ease, background-color 0.6s ease, box-shadow 0.6s ease;
+    transition: --cd-dk 0.6s ease, background-color 0.6s ease, box-shadow 0.6s ease, color 0.6s ease;
     border-radius: 6px;
   }
   .cd-on table.ContributionCalendar-grid { overflow: visible !important; }
@@ -67,6 +67,8 @@
   .cd-on.cd-club {
     background-color: #0b0912;
     box-shadow: 0 0 0 8px #0b0912;
+    /* Unclassed text such as GitHub's "Happy Halloween!" inherits this, so it stays readable on the dark backdrop. */
+    color: #e6e1ef;
     color-scheme: dark; /* dark scrollbar under the calendar */
   }
   .cd-on .ContributionCalendar-label,

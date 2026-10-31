@@ -54,7 +54,7 @@ npm run compile
 npm run zip:firefox
 ```
 
-`npm ci` installs the exact public npm dependencies recorded in `package-lock.json` and automatically runs `wxt prepare`. The extension is built into `.output/firefox-mv3/`. Submit `.output/contrib-dance-0.1.0-firefox.zip` as the add-on and `.output/contrib-dance-0.1.0-sources.zip` as the matching source archive. The source archive excludes local recordings, build output and `node_modules`.
+`npm ci` installs the exact public npm dependencies recorded in `package-lock.json` and automatically runs `wxt prepare`. The extension is built into `.output/firefox-mv3/`. Submit `.output/contrib-dance-0.2.0-firefox.zip` as the add-on and `.output/contrib-dance-0.2.0-sources.zip` as the matching source archive. The source archive excludes local recordings, build output and `node_modules`.
 
 ## Layout
 
@@ -73,6 +73,7 @@ npm run zip:firefox
 - GitHub computes a tile's level as `ceil(4 · count / R0)`, where R0 is the max after trimming outlier days. The extension reads counts from the tooltips and infers R0 from the (count, level) pairs. The "GitHub's look" position in the popup is that R0.
 - The colored square is `td::after`, so it can dance while the cell itself stays put as the target for tooltips, hover and clicks.
 - Every dance move is pinned to a shared clock (`Animation.startTime`), so changing settings never changes the tempo. A tile that switches moves fades the old one out first.
+- Disco lights start from the colors GitHub is currently showing, including its Halloween and winter palettes, colorblind themes and dark mode. With no light layer on they match the highlight exactly; rainbow and mirror ball recolor from there, and the glow takes the palette's main color.
 - Safety: no strobe, a tile's lightness changes by at most 3 L units per second, colors keep the red share below 0.7, and the tempo is capped at 150 BPM. On devices that ask for reduced motion, dance and disco start only after you turn them on in the popup on that device.
 - When everything is off, the extension removes its classes, styles and elements, and the page is exactly as GitHub rendered it.
 
