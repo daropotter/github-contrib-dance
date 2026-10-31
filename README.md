@@ -54,7 +54,7 @@ npm run compile
 npm run zip:firefox
 ```
 
-`npm ci` installs the exact public npm dependencies recorded in `package-lock.json` and automatically runs `wxt prepare`. The extension is built into `.output/firefox-mv3/`. Submit `.output/contrib-dance-0.1.0-firefox.zip` as the add-on and `.output/contrib-dance-0.1.0-sources.zip` as the matching source archive. The source archive excludes local recordings, build output and `node_modules`.
+`npm ci` installs the exact public npm dependencies recorded in `package-lock.json` and automatically runs `wxt prepare`. The extension is built into `.output/firefox-mv3/`. Submit `.output/contrib-dance-0.2.0-firefox.zip` as the add-on and `.output/contrib-dance-0.2.0-sources.zip` as the matching source archive. The source archive excludes local recordings, build output and `node_modules`.
 
 ## Layout
 
