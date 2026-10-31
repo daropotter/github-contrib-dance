@@ -12,6 +12,8 @@ All settings live in the toolbar popup. They apply to every profile and may sync
 
 ## Install
 
+**Chrome:** [Get Contrib Dance for GitHub on the Chrome Web Store](https://chromewebstore.google.com/detail/dehjljfgejmkecnemhlindpokedbipkl).
+
 **Firefox:** [Get Contrib Dance for GitHub on Mozilla Add-ons](https://addons.mozilla.org/pl/firefox/addon/contrib-dance-for-github/).
 
 Submitted to Mozilla and awaiting review; the listing or download may not be publicly available yet.
